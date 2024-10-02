@@ -1,0 +1,5 @@
+<ul class="prompt-list">
+  @for (item of list(); track item) {
+    <li (click)="selectItem(item)">{{ item }}</li>
+  }
+</ul>

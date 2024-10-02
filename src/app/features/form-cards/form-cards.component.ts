@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, inject, OnInit} from "@angular/core";
 import {NgClass, NgForOf} from "@angular/common";
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 
 import {CardComponent} from "../../shared/components/card/card.component";
-import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
   selector: "app-form-cards",
@@ -20,7 +20,14 @@ import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/f
 export class FormCardsComponent implements OnInit {
   private readonly fb: FormBuilder = inject(FormBuilder);
 
-  cards: FormArray = this.fb.array([]);
+  cardsForm: FormGroup = this.fb.group({
+    cards: this.fb.array<FormGroup>([])
+  })
+
+  // TODO: typing
+  get cards(): any {
+    return this.cardsForm.get('cards') as any;
+  }
 
   ngOnInit(): void {
     this.initFirstCard();
@@ -29,32 +36,24 @@ export class FormCardsComponent implements OnInit {
   public addCard(): void {
     if (this.cards.length > 9) return;
 
-    const formGroup = this.fb.group({
-      country: [''],
-      username: [''],
-      birthday: [''],
-    });
-
-    this.cards.push(formGroup);
+    this.cards.push(this.getNewCardGroup());
   }
 
-  public removeForm(index: number): void {
+  public removeCard(index: number): void {
     this.cards.removeAt(index);
   }
 
-  public submit(): void {
-    console.log(this.cards.value);
+  public submit(): void {}
+
+  private getNewCardGroup(): FormGroup {
+    return this.fb.group({
+      country: ['', [Validators.required]],
+      username: [''],
+      birthday: [''],
+    })
   }
 
   private initFirstCard(): void {
-    const formGroup = this.fb.group({
-      country: [''],
-      username: [''],
-      birthday: [''],
-    });
-
-    this.cards.push(formGroup);
+    this.cards.push(this.getNewCardGroup());
   }
-
-  protected readonly FormGroup = FormGroup;
 }

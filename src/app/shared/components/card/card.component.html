@@ -1,16 +1,19 @@
 <div [formGroup]="formGroup">
-  <button type="button" class="btn-close" aria-label="Close"></button>
+  <button type="button" class="btn-close" aria-label="Close" (click)="onRemove()"></button>
   <div class="mb-3">
-    <label for="country" class="form-label">Country</label>
-    <input formControlName="country" type="text" class="form-control" id="country" aria-describedby="country">
-    <!--        <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>-->
+    <label for="country-{{idx}}" class="form-label">Country</label>
+    <input formControlName="country" type="text" class="form-control" id="country-{{idx}}" aria-describedby="country">
+
+    @if (filteredCountries().length > 0) {
+      <app-input-prompt [list]="filteredCountries" (onSelected)="selectCountry($event)"></app-input-prompt>
+    }
   </div>
   <div class="mb-3">
-    <label for="username" class="form-label">Username</label>
-    <input formControlName="username" type="text" class="form-control" id="username" aria-describedby="username">
+    <label for="username-{{idx}}" class="form-label">Username</label>
+    <input formControlName="username" type="text" class="form-control" id="username-{{idx}}" aria-describedby="username">
   </div>
   <div class="mb-3">
-    <label for="birthday" class="form-label">Birthday</label>
-    <input formControlName="birthday" type="date" class="form-control" id="birthday" name="birthday">
+    <label for="birthday-{{idx}}" class="form-label">Birthday</label>
+    <input formControlName="birthday" type="date" class="form-control" id="birthday-{{idx}}" name="birthday">
   </div>
 </div>

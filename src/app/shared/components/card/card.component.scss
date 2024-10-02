@@ -1,4 +1,15 @@
 :host {
+  position: relative;
+  padding: 16px;
+  margin-right: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  .mb-3 {
+    position: relative;
+  }
+
   .btn-close {
     position: absolute;
     top: 20px;
