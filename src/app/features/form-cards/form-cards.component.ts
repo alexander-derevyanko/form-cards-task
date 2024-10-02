@@ -1,29 +1,43 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit} from "@angular/core";
-import {NgClass, NgForOf} from "@angular/common";
+import {ChangeDetectionStrategy, Component, inject, OnInit, signal, WritableSignal} from "@angular/core";
+import {DatePipe, NgClass, NgForOf} from "@angular/common";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 
 import {CardComponent} from "../../shared/components/card/card.component";
 import {birthdayValidator} from "../../core/validators/birthday.validator";
+import {countryValidator} from "../../core/validators/country.validator";
+import {usernameValidator} from "../../core/validators/username.validator";
+import {FormCardsApiService} from "./form-cards-api.service";
+import {FormCardsService} from "./form-cards.service";
 
 @Component({
   selector: "app-form-cards",
   templateUrl: "./form-cards.component.html",
   styleUrls: ["./form-cards.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
     NgClass,
     CardComponent,
     ReactiveFormsModule,
-    NgForOf
+    NgForOf,
+    DatePipe
   ],
-  standalone: true
+  providers: [FormCardsApiService, FormCardsService],
 })
 export class FormCardsComponent implements OnInit {
   private readonly fb: FormBuilder = inject(FormBuilder);
+  private readonly formCardsApiService: FormCardsApiService = inject(FormCardsApiService);
+  private readonly formCardsService: FormCardsService = inject(FormCardsService);
 
   cardsForm: FormGroup = this.fb.group({
     cards: this.fb.array<FormGroup>([])
-  })
+  });
+
+  amountInvalidCards: number = 0;
+
+  secondsLeftBeforeRequest: WritableSignal<number> = signal(5000);
+  isFormValid: WritableSignal<any> = signal(true);
+  isFormSubmitted: WritableSignal<any> = signal(false);
 
   // TODO: typing
   get cards(): any {
@@ -45,13 +59,14 @@ export class FormCardsComponent implements OnInit {
   }
 
   public submit(): void {
+    console.log('form', this.cardsForm);
     console.log('submit', this.cardsForm.getRawValue());
   }
 
   private getNewCardGroup(): FormGroup {
     return this.fb.group({
-      country: ['', [Validators.required]],
-      username: ['', [Validators.required]],
+      country: ['', [Validators.required, countryValidator]],
+      username: ['', [Validators.required], [usernameValidator(this.formCardsApiService)]],
       birthday: ['', [Validators.required, birthdayValidator]],
     })
   }

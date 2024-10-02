@@ -6,18 +6,24 @@
 
     @if (filteredCountries().length > 0) {
       <app-input-prompt [list]="filteredCountries" (onSelected)="selectCountry($event)"></app-input-prompt>
+    } @else if (formGroup.get('country')?.touched && formGroup.get('country')?.errors?.['invalidCountry']) {
+      <div id="country" class="form-text text-danger">Please provide a correct Country</div>
     }
   </div>
   <div class="mb-3">
     <label for="username-{{idx}}" class="form-label">Username</label>
     <input formControlName="username" type="text" class="form-control" id="username-{{idx}}" aria-describedby="username">
+
+    @if (formGroup.get('username')?.touched && formGroup.get('username')?.errors?.['usernameTaken']) {
+      <div id="username" class="form-text text-danger">Please provide a correct Username</div>
+    }
   </div>
   <div class="mb-3">
     <label for="birthday-{{idx}}" class="form-label">Birthday</label>
     <input formControlName="birthday" type="date" class="form-control" id="birthday-{{idx}}" name="birthday">
 
     @if (formGroup.get('birthday')?.errors?.['invalidDate']) {
-      <div id="birthday" class="form-text text-danger">Birthdays cannot be after the current date.</div>
+      <div id="birthday" class="form-text text-danger">Please provide a correct Birthday</div>
     }
   </div>
 </div>

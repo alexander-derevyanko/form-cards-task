@@ -27,7 +27,7 @@ import {InputPromptComponent} from "../input-prompt/input-prompt.component";
 })
 export class CardComponent implements OnInit {
   @Input() formGroup!: FormGroup;
-  @Input() idx: number;
+  @Input() idx!: number;
 
   @Output() remove: EventEmitter<void> = new EventEmitter<void>();
 

@@ -8,7 +8,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal}
   standalone: true
 })
 export class InputPromptComponent {
-  @Input() list: Signal<string[]>;
+  @Input() list!: Signal<string[]>;
 
   @Output() onSelected: EventEmitter<string> = new EventEmitter<string>();
 

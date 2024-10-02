@@ -3,16 +3,17 @@
     <button
       type="button"
       class="btn"
-      [ngClass]="true ? 'btn-primary' : 'btn-danger'"
+      [ngClass]="isFormSubmitted() ? 'btn-danger' : 'btn-primary'"
+      [disabled]="!isFormValid()"
       (click)="submit()"
     >
-      {{ true ? 'Submit all forms' : 'Cancel' }}
+      {{ isFormSubmitted() ? 'Cancel' : 'Submit all forms' }}
     </button>
 
-    @if (false) {
-
-    } @else {
-      <span class="invalid-forms-counter">Invalid forms: {{ 2 }}</span>
+    @if (isFormSubmitted()) {
+      {{ secondsLeftBeforeRequest() | date : 'm:ss' }}
+    } @else if (!isFormValid()) {
+      <span class="text-danger invalid-forms-counter">Invalid forms: {{ amountInvalidCards }}</span>
     }
   </header>
   <form [formGroup]="cardsForm">

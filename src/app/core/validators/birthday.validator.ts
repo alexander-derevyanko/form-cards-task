@@ -2,9 +2,5 @@ export const birthdayValidator = (control: { value: string }): { [key: string]: 
   const today = new Date();
   const selectedDate = new Date(control.value);
 
-  if (selectedDate > today) {
-    return { invalidDate: true };
-  }
-
-  return null;
+  return selectedDate > today ? { invalidDate: true } : null;
 }
