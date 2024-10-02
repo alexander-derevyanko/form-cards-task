@@ -15,5 +15,9 @@
   <div class="mb-3">
     <label for="birthday-{{idx}}" class="form-label">Birthday</label>
     <input formControlName="birthday" type="date" class="form-control" id="birthday-{{idx}}" name="birthday">
+
+    @if (formGroup.get('birthday')?.errors?.['invalidDate']) {
+      <div id="birthday" class="form-text text-danger">Birthdays cannot be after the current date.</div>
+    }
   </div>
 </div>

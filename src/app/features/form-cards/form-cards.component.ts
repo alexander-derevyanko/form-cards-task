@@ -3,6 +3,7 @@ import {NgClass, NgForOf} from "@angular/common";
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 
 import {CardComponent} from "../../shared/components/card/card.component";
+import {birthdayValidator} from "../../core/validators/birthday.validator";
 
 @Component({
   selector: "app-form-cards",
@@ -43,13 +44,15 @@ export class FormCardsComponent implements OnInit {
     this.cards.removeAt(index);
   }
 
-  public submit(): void {}
+  public submit(): void {
+    console.log('submit', this.cardsForm.getRawValue());
+  }
 
   private getNewCardGroup(): FormGroup {
     return this.fb.group({
       country: ['', [Validators.required]],
-      username: [''],
-      birthday: [''],
+      username: ['', [Validators.required]],
+      birthday: ['', [Validators.required, birthdayValidator]],
     })
   }
 
