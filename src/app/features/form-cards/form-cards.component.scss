@@ -1,0 +1,39 @@
+:host {
+  .header-block {
+    margin-bottom: 20px;
+
+    .invalid-forms-counter {
+      margin-left: 16px;
+      color: red;
+    }
+  }
+
+  .forms-block {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+
+    .form-card {
+      position: relative;
+      padding: 16px;
+      margin-right: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .add-form-card-btn {
+      width: 237px;
+      height: 292px;
+      background: rgb(221,221,221);
+      background: linear-gradient(90deg, rgba(221,221,221,1) 0%, rgba(255,255,255,1) 100%);
+      border: 1px dashed;
+      border-radius: 4px;
+
+      & > .bi-plus-circle-dotted {
+        font-size: 50px;
+        color: blue;
+      }
+    }
+  }
+}

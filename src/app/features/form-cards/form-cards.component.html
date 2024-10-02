@@ -1,0 +1,35 @@
+<div class="container">
+  <header class="header-block">
+    <button
+      type="button"
+      class="btn"
+      [ngClass]="true ? 'btn-primary' : 'btn-danger'"
+      (click)="submit()"
+    >
+      {{ true ? 'Submit all forms' : 'Cancel' }}
+    </button>
+
+    @if (false) {
+
+    } @else {
+      <span class="invalid-forms-counter">Invalid forms: {{ 2 }}</span>
+    }
+  </header>
+  <div class="forms-block">
+    <form class="form-card">
+      <div formArrayName="cards">
+        @for (card of cards.controls; track card; let i = $index) {
+          <app-card
+            [formGroup]="card"
+            (remove)="removeForm(i)"
+          >
+          </app-card>
+        }
+      </div>
+    </form>
+    <button type="button" class="add-form-card-btn" (click)="addCard()">
+      <i class="bi bi-plus-circle-dotted"></i>
+    </button>
+  </div>
+</div>
+
