@@ -4,15 +4,15 @@
       type="button"
       class="btn"
       [ngClass]="isFormSubmitted() ? 'btn-danger' : 'btn-primary'"
-      [disabled]="!isFormValid()"
-      (click)="submit()"
+      [disabled]="!isFormValid() && amountInvalidCards > 0"
+      (click)="!isFormSubmitted() ? submit() : cancel()"
     >
       {{ isFormSubmitted() ? 'Cancel' : 'Submit all forms' }}
     </button>
 
     @if (isFormSubmitted()) {
-      {{ secondsLeftBeforeRequest() | date : 'm:ss' }}
-    } @else if (!isFormValid()) {
+      {{ msLeftBeforeRequest() | date : 'm:ss' }}
+    } @else if (!isFormValid() && amountInvalidCards > 0) {
       <span class="text-danger invalid-forms-counter">Invalid forms: {{ amountInvalidCards }}</span>
     }
   </header>
@@ -27,7 +27,7 @@
         </app-card>
       }
 
-      <button type="button" class="add-form-card-btn" (click)="addCard()">
+      <button type="button" class="add-form-card-btn" [disabled]="isFormSubmitted()" (click)="addCard()">
         <i class="bi bi-plus-circle-dotted"></i>
       </button>
     </div>

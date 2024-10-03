@@ -9,6 +9,7 @@ import {
 } from "@angular/core";
 import {AbstractControl, FormControlStatus} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {filter} from "rxjs";
 
 @Directive({
   selector: '[appInputValidation]',
@@ -19,22 +20,23 @@ export class InputValidationDirective implements OnChanges {
   @Input() errorType!: string;
 
   private errorElement!: HTMLElement | null;
-  private destroyRef: DestroyRef = inject(DestroyRef);
 
   private readonly handlers: {[key: string]: Function } = {
     'INVALID': this.handleInvalidCase.bind(this),
-    'VALID': this.handleValidCase.bind(this),
-    'PENDING': () => {},
-    'DISABLED': () => {},
+    'VALID': this.handleValidCase.bind(this)
   }
 
   private readonly elementRef: ElementRef = inject(ElementRef);
   private readonly renderer: Renderer2 = inject(Renderer2);
+  private readonly destroyRef: DestroyRef = inject(DestroyRef);
 
   ngOnChanges(): void {
     if (this.control) {
       this.control.statusChanges
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .pipe(
+          takeUntilDestroyed(this.destroyRef),
+          filter((status: FormControlStatus) => status === 'VALID' || status === 'INVALID')
+        )
         .subscribe((status: FormControlStatus) => this.handlers?.[status]());
     }
   }
