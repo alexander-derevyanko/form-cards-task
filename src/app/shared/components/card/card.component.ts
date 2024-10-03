@@ -13,6 +13,7 @@ import {FormGroup, ReactiveFormsModule} from "@angular/forms";
 
 import {Country} from "../../enum/country";
 import {InputPromptComponent} from "../input-prompt/input-prompt.component";
+import {InputValidationDirective} from "../../directives/input-validation.directive";
 
 @Component({
   selector: "app-card",
@@ -21,7 +22,8 @@ import {InputPromptComponent} from "../input-prompt/input-prompt.component";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
-    InputPromptComponent
+    InputPromptComponent,
+    InputValidationDirective
   ],
   standalone: true
 })
