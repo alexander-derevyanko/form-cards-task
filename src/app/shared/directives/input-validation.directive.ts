@@ -11,6 +11,8 @@ import {AbstractControl, FormControlStatus} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter} from "rxjs";
 
+import {FormCtrlStatus} from "../enum/form-ctrl-status.enum";
+
 @Directive({
   selector: '[appInputValidation]',
   standalone: true,
@@ -22,8 +24,8 @@ export class InputValidationDirective implements OnChanges {
   private errorElement!: HTMLElement | null;
 
   private readonly handlers: {[key: string]: Function } = {
-    'INVALID': this.handleInvalidCase.bind(this),
-    'VALID': this.handleValidCase.bind(this)
+    [FormCtrlStatus.Invalid]: this.handleInvalidCase.bind(this),
+    [FormCtrlStatus.Valid]: this.handleValidCase.bind(this)
   }
 
   private readonly elementRef: ElementRef = inject(ElementRef);
@@ -31,11 +33,15 @@ export class InputValidationDirective implements OnChanges {
   private readonly destroyRef: DestroyRef = inject(DestroyRef);
 
   ngOnChanges(): void {
+    this.init();
+  }
+
+  private init(): void {
     if (this.control) {
       this.control.statusChanges
         .pipe(
           takeUntilDestroyed(this.destroyRef),
-          filter((status: FormControlStatus) => status === 'VALID' || status === 'INVALID')
+          filter((status: FormControlStatus) => status === FormCtrlStatus.Valid || status === FormCtrlStatus.Invalid)
         )
         .subscribe((status: FormControlStatus) => this.handlers?.[status]());
     }

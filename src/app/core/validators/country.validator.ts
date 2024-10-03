@@ -1,4 +1,4 @@
-import {Country} from "../../shared/enum/country";
+import {Country} from "../../shared/enum/country.enum";
 
 export const countryValidator = (control: { value: Country }): { [key: string]: boolean } | null => {
   if (control.value) {

@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import {FormGroup, ReactiveFormsModule} from "@angular/forms";
 
-import {Country} from "../../enum/country";
+import {Country} from "../../enum/country.enum";
 import {InputPromptComponent} from "../input-prompt/input-prompt.component";
 import {InputValidationDirective} from "../../directives/input-validation.directive";
 
@@ -40,10 +40,7 @@ export class CardComponent implements OnInit {
 
   ngOnInit(): void {
     this.listenCountryInputChange();
-
-    this.filteredCountries = computed(() => {
-      return this.countryEnum.filter((country) => country.toLowerCase().includes(this.countryCtrlVal() as string));
-    });
+    this.filterCountriesWatcher();
   }
 
   public selectCountry(country: string): void {
@@ -56,10 +53,16 @@ export class CardComponent implements OnInit {
 
   private listenCountryInputChange(): void {
     this.formGroup.get('country')?.valueChanges
-      .subscribe((value: any) => {
+      .subscribe((value: string) => {
         const res = !value ? null : value;
 
         this.countryCtrlVal.set(res);
+    });
+  }
+
+  private filterCountriesWatcher(): void {
+    this.filteredCountries = computed(() => {
+      return this.countryEnum.filter((country) => country.toLowerCase().includes(this.countryCtrlVal() as string));
     });
   }
 }

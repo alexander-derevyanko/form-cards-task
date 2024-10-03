@@ -8,16 +8,17 @@ import {
   WritableSignal
 } from "@angular/core";
 import {DatePipe, NgClass, NgForOf} from "@angular/common";
-import {FormBuilder, FormControl, FormControlStatus, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormArray, FormControl, FormControlStatus, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {filter, map, Observable, Subscription, take, tap, timer} from "rxjs";
+import {filter, Observable, of, Subscription, switchMap, tap} from "rxjs";
 
 import {CardComponent} from "../../shared/components/card/card.component";
-import {birthdayValidator} from "../../core/validators/birthday.validator";
-import {countryValidator} from "../../core/validators/country.validator";
-import {usernameValidator} from "../../core/validators/username.validator";
 import {FormCardsApiService} from "./form-cards-api.service";
 import {FormCardsService} from "./form-cards.service";
+import {FormCtrlStatus} from "../../shared/enum/form-ctrl-status.enum";
+import {CtrlAccessState} from "../../shared/enum/ctrl-access-state.enum";
+import {countdownTimer} from "../../shared/utils/countdown-timer";
+import {SubmitFormResponseData} from "../../shared/interface/responses";
 
 @Component({
   selector: "app-form-cards",
@@ -35,14 +36,7 @@ import {FormCardsService} from "./form-cards.service";
   providers: [FormCardsApiService, FormCardsService],
 })
 export class FormCardsComponent implements OnInit {
-  private readonly fb: FormBuilder = inject(FormBuilder);
-  private readonly formCardsApiService: FormCardsApiService = inject(FormCardsApiService);
-  private readonly formCardsService: FormCardsService = inject(FormCardsService);
-  private readonly destroyRef: DestroyRef = inject(DestroyRef);
-
-  cardsForm: FormGroup = this.fb.group({
-    cards: this.fb.array<FormGroup>([])
-  });
+  cardsForm!: FormGroup;
 
   amountInvalidCards: number = 0;
 
@@ -52,25 +46,29 @@ export class FormCardsComponent implements OnInit {
 
   private timerSubscription: Subscription | null = null;
 
+  private readonly formCardsApiService: FormCardsApiService = inject(FormCardsApiService);
+  private readonly formCardsService: FormCardsService = inject(FormCardsService);
+  private readonly destroyRef: DestroyRef = inject(DestroyRef);
+
   // TODO: typing
   get cards(): any {
     return this.cardsForm.get('cards') as any;
   }
 
   ngOnInit(): void {
-    this.initFirstCard();
+    this.cardsForm = this.formCardsService.getCardsForm();
+
     this.listenFormStatus(); // reset disabled submit btn after form is valid
-    console.log(this.cardsForm);
   }
 
   public addCard(): void {
     if (this.cards.length > 9) return;
 
-    this.cards.push(this.getNewCardGroup());
+    this.formCardsService.addCard();
   }
 
   public removeCard(index: number): void {
-    this.cards.removeAt(index);
+    this.formCardsService.removeCard(index);
   }
 
   public submit(): void {
@@ -84,49 +82,47 @@ export class FormCardsComponent implements OnInit {
     }
 
     this.isFormSubmitted.set(true);
-    this.enableDisableCtrl('disable');
-    this.timerSubscription = this.startTimer()
+    this.enableDisableCtrl(CtrlAccessState.Disable);
+    this.saveData();
+  }
+
+  public cancel(): void {
+    this.isFormSubmitted.set(false);
+    this.enableDisableCtrl(CtrlAccessState.Enable);
+    this.stopTimer();
+  }
+
+  private saveData(): void {
+    this.timerSubscription = countdownTimer(5)
       .pipe(
-        tap((secondsLeft: number) => this.msLeftBeforeRequest.set(secondsLeft * 1000))
+        tap((secondsLeft: number) => this.msLeftBeforeRequest.set(secondsLeft * 1000)),
+        switchMap((secondsLeft: number) => {
+          if (secondsLeft === 0) {
+            return this.formCardsApiService.submitForm(this.cardsForm.getRawValue()) as Observable<SubmitFormResponseData>;
+          }
+
+          return of({} as SubmitFormResponseData);
+        }),
+        filter((res: SubmitFormResponseData) => Object.values(res).length > 0),
       )
       .subscribe({
+        next: (res: SubmitFormResponseData): void => console.info('RESULT: ', res),
         complete: (): void => {
           this.isFormSubmitted.set(false);
-          this.enableDisableCtrl('enable');
-          this.cardsForm.reset();
-          this.formCardsApiService.submitForm(this.cardsForm.getRawValue()).subscribe((res: any) => console.log('RESULT: ', res));
+          this.enableDisableCtrl(CtrlAccessState.Enable);
+          this.formCardsService.resetFullyForm();
         },
       });
   }
 
-  // TODO: move to utils and make generic
-  public startTimer(): Observable<number> {
-    return timer(0, 1000)
-      .pipe(
-        take(6),
-        map((secondsElapsed: number) => 5 - secondsElapsed)
-      )
-  }
-
-  public cancel(): void {
-    console.log('!!! CANCEL');
-    this.isFormSubmitted.set(false);
-    this.enableDisableCtrl('enable');
-    this.stopTimer();
-  }
-
   private validateCards(): void {
-    Object.values(this.cards['controls']).forEach((item: any) => {
-      const controls = Object.values(item['controls']);
-
-      controls.forEach((control: any) => {
-        control.updateValueAndValidity();
-        control.markAsTouched();
-      });
+    this.formCardsService.handleEachCtrl((ctrl: FormControl) => {
+      ctrl.updateValueAndValidity();
+      ctrl.markAsTouched();
     });
 
     this.isFormValid.set(false);
-    this.amountInvalidCards = this.cards['controls'].filter((el: any) => el.status === 'INVALID').length;
+    this.amountInvalidCards = this.cards['controls'].filter((ctrl: FormControl) => ctrl.status === FormCtrlStatus.Invalid).length;
   }
 
   private stopTimer(): void {
@@ -134,37 +130,22 @@ export class FormCardsComponent implements OnInit {
     this.msLeftBeforeRequest.set(5000);
   }
 
-  private enableDisableCtrl(action: 'enable' | 'disable'): void {
-    Object.values(this.cards['controls']).forEach((item: any) => {
-      const controls: FormControl[] = Object.values(item['controls']);
-
-      controls.forEach((control: FormControl) => {
-        control[action]()
-      });
-    });
-  }
-
-  private getNewCardGroup(): FormGroup {
-    return this.fb.group({
-      country: ['', [Validators.required, countryValidator]],
-      username: ['', [Validators.required], [usernameValidator(this.formCardsApiService)]],
-      birthday: ['', [Validators.required, birthdayValidator]],
-    })
-  }
-
-  private initFirstCard(): void {
-    this.cards.push(this.getNewCardGroup());
+  private enableDisableCtrl(action: CtrlAccessState): void {
+    this.formCardsService.handleEachCtrl((ctrl: FormControl) => ctrl[action]());
   }
 
   private listenFormStatus(): void {
     this.cardsForm.statusChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter((status) => status === 'VALID' || status === 'INVALID')
+        filter((status) => status === FormCtrlStatus.Valid || status === FormCtrlStatus.Invalid)
       )
       .subscribe((status: FormControlStatus) => {
         console.log('!!!! status', status);
-        this.isFormValid.set(status === 'VALID');
+        console.log(this.cardsForm);
+        this.isFormValid.set(status === FormCtrlStatus.Valid);
       });
   }
+
+  protected readonly FormGroup = FormGroup;
 }
