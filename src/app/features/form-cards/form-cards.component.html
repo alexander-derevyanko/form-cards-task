@@ -14,6 +14,7 @@
         <app-card
           [formGroup]="card"
           [idx]="i"
+          [disableRemove]="isFormSubmitted"
           (remove)="removeCard(i)"
         >
         </app-card>

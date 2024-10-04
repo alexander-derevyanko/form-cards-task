@@ -1,5 +1,5 @@
 <div [formGroup]="formGroup">
-  <button type="button" class="btn-close" aria-label="Close" (click)="onRemove()"></button>
+  <button type="button" class="btn-close" aria-label="Close" [disabled]="disableRemove()" (click)="onRemove()"></button>
   <div class="mb-3">
     <label for="country-{{idx}}" class="form-label">Country</label>
     <input

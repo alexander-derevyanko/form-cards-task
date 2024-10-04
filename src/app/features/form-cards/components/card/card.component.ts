@@ -9,7 +9,8 @@ import {
   OnInit,
   Output,
   Signal,
-  signal
+  signal,
+  WritableSignal
 } from "@angular/core";
 import {FormGroup, ReactiveFormsModule} from "@angular/forms";
 
@@ -33,6 +34,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 export class CardComponent implements OnInit {
   @Input() formGroup!: FormGroup;
   @Input() idx!: number;
+  @Input() disableRemove: WritableSignal<boolean> = signal(false);
 
   @Output() remove: EventEmitter<void> = new EventEmitter<void>();
 
