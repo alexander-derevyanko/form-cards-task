@@ -9,9 +9,10 @@ import {
 } from "@angular/core";
 import {AbstractControl, FormControlStatus} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {filter} from "rxjs";
+import {combineLatestWith, filter, Observable} from "rxjs";
 
 import {FormCtrlStatus} from "../enum/form-ctrl-status.enum";
+import {FormCardsService} from "../../features/form-cards/form-cards.service";
 
 @Directive({
   selector: '[appInputValidation]',
@@ -28,6 +29,7 @@ export class InputValidationDirective implements OnChanges {
     [FormCtrlStatus.Valid]: this.handleValidCase.bind(this)
   }
 
+  private readonly formCardsService: FormCardsService = inject(FormCardsService);
   private readonly elementRef: ElementRef = inject(ElementRef);
   private readonly renderer: Renderer2 = inject(Renderer2);
   private readonly destroyRef: DestroyRef = inject(DestroyRef);
@@ -37,14 +39,18 @@ export class InputValidationDirective implements OnChanges {
   }
 
   private init(): void {
-    if (this.control) {
-      this.control.statusChanges
-        .pipe(
-          takeUntilDestroyed(this.destroyRef),
-          filter((status: FormControlStatus) => status === FormCtrlStatus.Valid || status === FormCtrlStatus.Invalid)
+    const statusChanges$ = this.control?.statusChanges as Observable<FormControlStatus>;
+    const isFormSaved$ = this.formCardsService.isFormSaved.asObservable();
+
+    statusChanges$
+      ?.pipe(
+        takeUntilDestroyed(this.destroyRef),
+        combineLatestWith(isFormSaved$),
+        filter(([status, saved]: [FormControlStatus, boolean]) =>
+          (status === FormCtrlStatus.Invalid || status === FormCtrlStatus.Valid) && saved === false
         )
-        .subscribe((status: FormControlStatus) => this.handlers?.[status]());
-    }
+      )
+      .subscribe(([status]: [FormControlStatus, boolean]) => this.handlers?.[status]());
   }
 
   private handleValidCase(): void {

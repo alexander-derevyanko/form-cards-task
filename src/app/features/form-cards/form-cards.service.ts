@@ -1,5 +1,6 @@
 import {inject, Injectable} from "@angular/core";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {BehaviorSubject} from "rxjs";
 
 import {countryValidator} from "@shared/validators/country.validator";
 import {usernameValidator} from "@shared/validators/username.validator";
@@ -9,6 +10,9 @@ import {FormCardsApiService} from "./form-cards-api.service";
 
 @Injectable()
 export class FormCardsService {
+  // need to prevent directive from marking controls as invalid after saving data
+  readonly isFormSaved: BehaviorSubject<any> = new BehaviorSubject(false);
+
   private readonly fb: FormBuilder = inject(FormBuilder);
   private readonly formCardsApiService: FormCardsApiService = inject(FormCardsApiService);
 
@@ -47,15 +51,6 @@ export class FormCardsService {
     this.cardsForm.reset();
     this.cardsForm.markAsUntouched();
     this.cardsForm.markAsPristine();
-    this.handleEachCtrl((ctrl: FormControl) => ctrl.setErrors(null)); // TODO:
-  }
-
-  // TODO:
-  public addValidators(validators: any): void {
-    this.handleEachCtrl((ctrl: FormControl) => {
-      ctrl.addValidators([Validators.required]);
-      ctrl.updateValueAndValidity();
-    });
   }
 
   public getAmountInvalidCards(): number {

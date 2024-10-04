@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   EventEmitter,
+  inject,
   Input,
   OnInit,
   Output,
@@ -14,6 +16,7 @@ import {FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {Country} from "@shared/enum/country.enum";
 import {InputPromptComponent} from "@shared/components/input-prompt/input-prompt.component";
 import {InputValidationDirective} from "@shared/directives/input-validation.directive";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: "app-card",
@@ -38,6 +41,8 @@ export class CardComponent implements OnInit {
   private countryCtrlVal = signal<string | null>(null);
   private readonly countryEnum = Object.values(Country);
 
+  private readonly destroyRef: DestroyRef = inject(DestroyRef);
+
   ngOnInit(): void {
     this.listenCountryInputChange();
     this.filterCountriesWatcher();
@@ -53,6 +58,7 @@ export class CardComponent implements OnInit {
 
   private listenCountryInputChange(): void {
     this.formGroup.get('country')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value: string) => {
         const res = !value ? null : value;
 

@@ -34,8 +34,9 @@ export class FormCardsComponent implements OnInit {
 
   amountInvalidCards: WritableSignal<number> = signal(0);
   msLeftBeforeRequest: WritableSignal<number> = signal(5000);
-  isFormValid: WritableSignal<any> = signal(true);
-  isFormSubmitted: WritableSignal<any> = signal(false);
+  isFormValid: WritableSignal<boolean> = signal(true);
+  isFormSubmitted: WritableSignal<boolean> = signal(false);
+  emptyForm: WritableSignal<boolean> = signal(false);
 
   private timerSubscription: Subscription | null = null;
 
@@ -58,6 +59,7 @@ export class FormCardsComponent implements OnInit {
     if (this.cards.length > 9) return;
 
     this.formCardsService.addCard();
+    this.emptyForm.set(false);
 
     // technically all new added forms are INVALID by default since we init Validators.required
     // it does make sense to change counter so as not to mislead the user
@@ -68,15 +70,21 @@ export class FormCardsComponent implements OnInit {
 
   public removeCard(index: number): void {
     this.formCardsService.removeCard(index);
+
+    if (this.cards['controls'].length === 0) {
+      this.emptyForm.set(true);
+    }
+
+    this.amountInvalidCards.set(this.formCardsService.getAmountInvalidCards());
+    this.formCardsService.isFormSaved.next(true); // TODO: revise
   }
 
-  public headerClickHandler(action: 'submit' | 'cancel'): void {
+  public headerClickHandler(action: BtnAction.Submit | BtnAction.Cancel): void {
     this[action]();
   }
 
   private submit(): void {
-    console.log('form', this.cardsForm);
-    console.log('submit', this.cardsForm.getRawValue());
+    this.formCardsService.isFormSaved.next(false);
 
     if (!this.cardsForm.valid) {
       this.validateCards();
@@ -109,7 +117,10 @@ export class FormCardsComponent implements OnInit {
         filter((res: SubmitFormResponseData) => Object.values(res).length > 0),
       )
       .subscribe({
-        next: (res: SubmitFormResponseData): void => console.info('RESULT: ', res),
+        next: (res: SubmitFormResponseData): void => {
+          console.info('RESULT: ', res);
+          this.formCardsService.isFormSaved.next(true);
+        },
         complete: (): void => {
           this.isFormSubmitted.set(false);
           this.enableDisableCtrl(CtrlAccessState.Enable);
@@ -143,9 +154,6 @@ export class FormCardsComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
         filter((status) => status === FormCtrlStatus.Valid || status === FormCtrlStatus.Invalid)
       )
-      .subscribe((status: FormControlStatus) => {
-        console.log('!!!! status', status);
-        this.isFormValid.set(status === FormCtrlStatus.Valid);
-      });
+      .subscribe((status: FormControlStatus) => this.isFormValid.set(status === FormCtrlStatus.Valid));
   }
 }
