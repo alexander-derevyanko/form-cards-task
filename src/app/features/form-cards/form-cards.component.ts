@@ -7,18 +7,18 @@ import {
   signal,
   WritableSignal
 } from "@angular/core";
-import {DatePipe, NgClass, NgForOf} from "@angular/common";
-import {FormControl, FormControlStatus, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormControlStatus, FormGroup} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, Observable, of, Subscription, switchMap, tap} from "rxjs";
 
-import {CardComponent} from "../../shared/components/card/card.component";
 import {FormCardsApiService} from "./form-cards-api.service";
 import {FormCardsService} from "./form-cards.service";
 import {FormCtrlStatus} from "../../shared/enum/form-ctrl-status.enum";
 import {CtrlAccessState} from "../../shared/enum/ctrl-access-state.enum";
 import {countdownTimer} from "../../shared/utils/countdown-timer";
 import {SubmitFormResponseData} from "../../shared/interface/responses";
+import {FormCardsImports} from "./form-cards.constants";
+import {BtnAction} from "../../shared/enum/btn-action.enum";
 
 @Component({
   selector: "app-form-cards",
@@ -26,13 +26,7 @@ import {SubmitFormResponseData} from "../../shared/interface/responses";
   styleUrls: ["./form-cards.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    NgClass,
-    CardComponent,
-    ReactiveFormsModule,
-    NgForOf,
-    DatePipe
-  ],
+  imports: [FormCardsImports],
   providers: [FormCardsApiService, FormCardsService],
 })
 export class FormCardsComponent implements OnInit {
@@ -76,7 +70,11 @@ export class FormCardsComponent implements OnInit {
     this.formCardsService.removeCard(index);
   }
 
-  public submit(): void {
+  public headerClickHandler(action: BtnAction): void {
+    this[action]();
+  }
+
+  private submit(): void {
     console.log('form', this.cardsForm);
     console.log('submit', this.cardsForm.getRawValue());
 
@@ -91,7 +89,7 @@ export class FormCardsComponent implements OnInit {
     this.saveData();
   }
 
-  public cancel(): void {
+  private cancel(): void {
     this.isFormSubmitted.set(false);
     this.enableDisableCtrl(CtrlAccessState.Enable);
     this.stopTimer();

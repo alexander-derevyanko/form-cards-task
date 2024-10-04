@@ -11,9 +11,9 @@ import {
 } from "@angular/core";
 import {FormGroup, ReactiveFormsModule} from "@angular/forms";
 
-import {Country} from "../../enum/country.enum";
-import {InputPromptComponent} from "../input-prompt/input-prompt.component";
-import {InputValidationDirective} from "../../directives/input-validation.directive";
+import {Country} from "../../../../shared/enum/country.enum";
+import {InputPromptComponent} from "../../../../shared/components/input-prompt/input-prompt.component";
+import {InputValidationDirective} from "../../../../shared/directives/input-validation.directive";
 
 @Component({
   selector: "app-card",

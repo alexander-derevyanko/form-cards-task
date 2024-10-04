@@ -1,0 +1,19 @@
+<header class="header-block">
+  <button
+    type="button"
+    class="btn"
+    [ngClass]="isFormSubmitted() ? 'btn-danger' : 'btn-primary'"
+    [disabled]="!isFormValid() && amountInvalidCards() > 0"
+    (click)="!isFormSubmitted() ? onClick(BtnAction.Submit) : onClick(BtnAction.Cancel)"
+  >
+    {{ isFormSubmitted() ? 'Cancel' : 'Submit all forms' }}
+  </button>
+
+  @if (isFormSubmitted()) {
+    {{ msLeftBeforeRequest() | date : 'm:ss' }}
+  }
+
+  @if (!isFormSubmitted() && !isFormValid() && amountInvalidCards() > 0) {
+    <span class="text-danger invalid-forms-counter">Invalid forms: {{ amountInvalidCards() }}</span>
+  }
+</header>
