@@ -1,7 +1,7 @@
 import {AbstractControl, AsyncValidatorFn} from "@angular/forms";
 import {map, of, switchMap, timer} from "rxjs";
 
-import {CheckUserResponseData} from "../../shared/interface/responses";
+import {CheckUserResponseData} from "../interface/responses";
 import {FormCardsApiService} from "../../features/form-cards/form-cards-api.service";
 
 export const usernameValidator = (usernameService: FormCardsApiService): AsyncValidatorFn => {

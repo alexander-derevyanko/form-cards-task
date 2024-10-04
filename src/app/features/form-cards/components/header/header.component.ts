@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal, WritableSignal} from "@angular/core";
 import {DatePipe, NgClass} from "@angular/common";
 
-import {BtnAction} from "../../../../shared/enum/btn-action.enum";
+import {BtnAction} from "@shared/enum/btn-action.enum";
 
 @Component({
   selector: "app-header",

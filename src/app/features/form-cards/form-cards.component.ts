@@ -13,12 +13,12 @@ import {filter, Observable, of, Subscription, switchMap, tap} from "rxjs";
 
 import {FormCardsApiService} from "./form-cards-api.service";
 import {FormCardsService} from "./form-cards.service";
-import {FormCtrlStatus} from "../../shared/enum/form-ctrl-status.enum";
-import {CtrlAccessState} from "../../shared/enum/ctrl-access-state.enum";
-import {countdownTimer} from "../../shared/utils/countdown-timer";
-import {SubmitFormResponseData} from "../../shared/interface/responses";
 import {FormCardsImports} from "./form-cards.constants";
-import {BtnAction} from "../../shared/enum/btn-action.enum";
+import {FormCtrlStatus} from "@shared/enum/form-ctrl-status.enum";
+import {CtrlAccessState} from "@shared/enum/ctrl-access-state.enum";
+import {countdownTimer} from "@shared/utils/countdown-timer";
+import {SubmitFormResponseData} from "@shared/interface/responses";
+import {BtnAction} from "@shared/enum/btn-action.enum";
 
 @Component({
   selector: "app-form-cards",
@@ -70,7 +70,7 @@ export class FormCardsComponent implements OnInit {
     this.formCardsService.removeCard(index);
   }
 
-  public headerClickHandler(action: BtnAction): void {
+  public headerClickHandler(action: 'submit' | 'cancel'): void {
     this[action]();
   }
 

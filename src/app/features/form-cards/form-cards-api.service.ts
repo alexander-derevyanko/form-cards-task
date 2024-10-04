@@ -2,7 +2,7 @@ import {inject, Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 
-import {CheckUserResponseData, SubmitFormResponseData} from "../../shared/interface/responses";
+import {CheckUserResponseData, SubmitFormResponseData} from "@shared/interface/responses";
 
 @Injectable()
 export class FormCardsApiService {

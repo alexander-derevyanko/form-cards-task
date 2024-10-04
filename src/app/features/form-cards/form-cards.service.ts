@@ -1,11 +1,11 @@
 import {inject, Injectable} from "@angular/core";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 
-import {countryValidator} from "../../core/validators/country.validator";
-import {usernameValidator} from "../../core/validators/username.validator";
-import {birthdayValidator} from "../../core/validators/birthday.validator";
+import {countryValidator} from "@shared/validators/country.validator";
+import {usernameValidator} from "@shared/validators/username.validator";
+import {birthdayValidator} from "@shared/validators/birthday.validator";
+import {FormCtrlStatus} from "@shared/enum/form-ctrl-status.enum";
 import {FormCardsApiService} from "./form-cards-api.service";
-import {FormCtrlStatus} from "../../shared/enum/form-ctrl-status.enum";
 
 @Injectable()
 export class FormCardsService {
@@ -47,7 +47,7 @@ export class FormCardsService {
     this.cardsForm.reset();
     this.cardsForm.markAsUntouched();
     this.cardsForm.markAsPristine();
-    this.handleEachCtrl((ctrl: FormControl) => ctrl.setErrors(null));
+    this.handleEachCtrl((ctrl: FormControl) => ctrl.setErrors(null)); // TODO:
   }
 
   // TODO:
