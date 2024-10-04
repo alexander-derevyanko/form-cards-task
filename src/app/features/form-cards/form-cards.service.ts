@@ -5,6 +5,7 @@ import {countryValidator} from "../../core/validators/country.validator";
 import {usernameValidator} from "../../core/validators/username.validator";
 import {birthdayValidator} from "../../core/validators/birthday.validator";
 import {FormCardsApiService} from "./form-cards-api.service";
+import {FormCtrlStatus} from "../../shared/enum/form-ctrl-status.enum";
 
 @Injectable()
 export class FormCardsService {
@@ -45,6 +46,7 @@ export class FormCardsService {
   public resetFullyForm(): void {
     this.cardsForm.reset();
     this.cardsForm.markAsUntouched();
+    this.cardsForm.markAsPristine();
     this.handleEachCtrl((ctrl: FormControl) => ctrl.setErrors(null));
   }
 
@@ -54,6 +56,10 @@ export class FormCardsService {
       ctrl.addValidators([Validators.required]);
       ctrl.updateValueAndValidity();
     });
+  }
+
+  public getAmountInvalidCards(): number {
+    return this.cards['controls'].filter((ctrl: FormControl) => ctrl.status === FormCtrlStatus.Invalid).length;
   }
 
   private getNewCardGroup(): FormGroup {

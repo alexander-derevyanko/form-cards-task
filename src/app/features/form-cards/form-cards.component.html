@@ -5,7 +5,7 @@
       type="button"
       class="btn"
       [ngClass]="isFormSubmitted() ? 'btn-danger' : 'btn-primary'"
-      [disabled]="!isFormValid() && amountInvalidCards > 0"
+      [disabled]="!isFormValid() && amountInvalidCards() > 0"
       (click)="!isFormSubmitted() ? submit() : cancel()"
     >
       {{ isFormSubmitted() ? 'Cancel' : 'Submit all forms' }}
@@ -13,8 +13,8 @@
 
     @if (isFormSubmitted()) {
       {{ msLeftBeforeRequest() | date : 'm:ss' }}
-    } @else if (!isFormValid() && amountInvalidCards > 0) {
-      <span class="text-danger invalid-forms-counter">Invalid forms: {{ amountInvalidCards }}</span>
+    } @else if (!isFormSubmitted() && !isFormValid() && amountInvalidCards() > 0) {
+      <span class="text-danger invalid-forms-counter">Invalid forms: {{ amountInvalidCards() }}</span>
     }
   </header>
   <form [formGroup]="cardsForm">

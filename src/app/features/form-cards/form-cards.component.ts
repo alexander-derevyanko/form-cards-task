@@ -8,7 +8,7 @@ import {
   WritableSignal
 } from "@angular/core";
 import {DatePipe, NgClass, NgForOf} from "@angular/common";
-import {FormArray, FormControl, FormControlStatus, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormControlStatus, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, Observable, of, Subscription, switchMap, tap} from "rxjs";
 
@@ -38,8 +38,7 @@ import {SubmitFormResponseData} from "../../shared/interface/responses";
 export class FormCardsComponent implements OnInit {
   cardsForm!: FormGroup;
 
-  amountInvalidCards: number = 0;
-
+  amountInvalidCards: WritableSignal<number> = signal(0);
   msLeftBeforeRequest: WritableSignal<number> = signal(5000);
   isFormValid: WritableSignal<any> = signal(true);
   isFormSubmitted: WritableSignal<any> = signal(false);
@@ -65,6 +64,12 @@ export class FormCardsComponent implements OnInit {
     if (this.cards.length > 9) return;
 
     this.formCardsService.addCard();
+
+    // technically all new added forms are INVALID by default since we init Validators.required
+    // it does make sense to change counter so as not to mislead the user
+    if (this.amountInvalidCards() > 0 && !this.isFormValid()) {
+      this.amountInvalidCards.set(this.formCardsService.getAmountInvalidCards());
+    }
   }
 
   public removeCard(index: number): void {
@@ -111,18 +116,18 @@ export class FormCardsComponent implements OnInit {
           this.isFormSubmitted.set(false);
           this.enableDisableCtrl(CtrlAccessState.Enable);
           this.formCardsService.resetFullyForm();
+          this.amountInvalidCards.set(this.formCardsService.getAmountInvalidCards());
         },
       });
   }
 
   private validateCards(): void {
+    this.isFormValid.set(false);
+    this.amountInvalidCards.set(this.formCardsService.getAmountInvalidCards());
     this.formCardsService.handleEachCtrl((ctrl: FormControl) => {
       ctrl.updateValueAndValidity();
       ctrl.markAsTouched();
     });
-
-    this.isFormValid.set(false);
-    this.amountInvalidCards = this.cards['controls'].filter((ctrl: FormControl) => ctrl.status === FormCtrlStatus.Invalid).length;
   }
 
   private stopTimer(): void {
@@ -142,10 +147,7 @@ export class FormCardsComponent implements OnInit {
       )
       .subscribe((status: FormControlStatus) => {
         console.log('!!!! status', status);
-        console.log(this.cardsForm);
         this.isFormValid.set(status === FormCtrlStatus.Valid);
       });
   }
-
-  protected readonly FormGroup = FormGroup;
 }
